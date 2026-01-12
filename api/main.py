@@ -115,45 +115,18 @@ class AdminUrlRequest(BaseModel):
     file_url: str
 
 # CHANGED: New endpoint for ReactJS to send the URL after direct upload
-@app.post("/admin/process-url")
+
+
+@app.post("/api/process-url")
 async def process_url(data: AdminUrlRequest):
+    # This receives the URL from React after the 4.48MB file is already in Vercel
     await inngest_client.send(
         inngest.Event(
             name="shop/product.imported",
             data={"file_url": data.file_url}
         )
     )
-    return {"message": "URL received from React. Indexing started."}
-
-
-@app.post("/api/upload")
-async def upload_document( 
-    file: UploadFile = File(...)
-):
-    file_content = await file.read()
-    
-    
-    uploaded_blob = blob.put(
-            path=file.filename,
-            data=file_content,
-            options={"access": "public"}
-        )
-    
-  
-
-    
-    # Trigger the durable workflow
-    await inngest_client.send(
-        inngest.Event(
-            name="shop/product.imported",
-            data={
-                "file_url": uploaded_blob.url,
-               
-            }
-        )
-    )
-    
-    return {"message": "Document queued for indexing by Admin."}
+    return {"message": "URL received. Indexing started in background."}
 
 
 class QuestionRequest(BaseModel):
