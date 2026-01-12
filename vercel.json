@@ -1,7 +1,7 @@
 {
     "rewrites": [
         {
-            "source": "/(.*)",
+            "source": "/((?!favicon.ico|static/).*)",
             "destination": "/api/main.py"
         }
     ]
