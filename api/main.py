@@ -110,8 +110,22 @@ app = FastAPI()
 # Serve Inngest
 inngest.fast_api.serve(app, inngest_client, [import_product_documents])
 
-# UPLOAD_DIR = "/tmp"
-# os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+class AdminUrlRequest(BaseModel):
+    file_url: str
+
+# CHANGED: New endpoint for ReactJS to send the URL after direct upload
+@app.post("/admin/process-url")
+async def process_url(data: AdminUrlRequest):
+    await inngest_client.send(
+        inngest.Event(
+            name="shop/product.imported",
+            data={"file_url": data.file_url}
+        )
+    )
+    return {"message": "URL received from React. Indexing started."}
+
 
 @app.post("/upload-and-index")
 async def upload_document( 
@@ -126,7 +140,7 @@ async def upload_document(
     )
     
   
-   
+
     
     # Trigger the durable workflow
     await inngest_client.send(
@@ -142,7 +156,12 @@ async def upload_document(
     return {"message": "Document queued for indexing by Admin."}
 
 
-# 2. USER ENDPOINT: Question Only (No file needed)
+@app.get("/api/upload/token")
+def get_blob_token():
+    # This token allows a browser to upload a file WITHOUT 4.5MB limits
+    return {"token": blob.generate_client_token()} 
+
+
 class QuestionRequest(BaseModel):
     user_question: str
 
