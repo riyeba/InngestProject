@@ -16,15 +16,18 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client import AsyncQdrantClient
+from llama_index.embeddings.openai import OpenAIEmbedding
 
 # 1. Load Environment Variables
 load_dotenv()
 
 # 2. Global Configuration
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+
 openai_key = os.getenv("OPENAI_API_KEY")
 qdrant_url = os.getenv("QDRANT_URL")
 qdrant_key = os.getenv("QDRANT_API_KEY")
+
+Settings.embed_model = OpenAIEmbedding(api_key=os.getenv("OPENAI_API_KEY"))
 
 llm = OpenAI(model="gpt-4o-mini", api_key=openai_key)
 
