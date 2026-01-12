@@ -31,9 +31,11 @@ openai_key = os.getenv("OPENAI_API_KEY")
 qdrant_url = os.getenv("QDRANT_URL")
 qdrant_key = os.getenv("QDRANT_API_KEY")
 
-Settings.embed_model = OpenAIEmbedding(api_key=os.getenv("OPENAI_API_KEY"))
+Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small", api_key=openai_key)
 
 llm = OpenAI(model="gpt-4o-mini", api_key=openai_key)
+
+
 
 # 3. Initialize Clients
 inngest_client = inngest.Inngest(
