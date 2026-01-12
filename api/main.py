@@ -12,7 +12,6 @@ from fastapi import FastAPI, File, UploadFile, Form
 # LlamaIndex Imports
 from llama_index.core import StorageContext, VectorStoreIndex, SimpleDirectoryReader, Settings
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client import AsyncQdrantClient
