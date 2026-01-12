@@ -114,8 +114,7 @@ inngest.fast_api.serve(app, inngest_client, [import_product_documents])
 # os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.post("/upload-and-index")
-async def upload_document(
-    question: str = Form(...), 
+async def upload_document( 
     file: UploadFile = File(...)
 ):
     file_content = await file.read()
