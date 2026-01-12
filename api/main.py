@@ -126,17 +126,18 @@ async def process_url(data: AdminUrlRequest):
     return {"message": "URL received from React. Indexing started."}
 
 
-@app.post("/upload-and-index")
+@app.post("/api/upload")
 async def upload_document( 
     file: UploadFile = File(...)
 ):
     file_content = await file.read()
     
-    uploaded_blob = blob.upload_file(
-        file_content=file_content,
-        path=file.filename,
-        access="public"
-    )
+    
+    uploaded_blob = blob.put(
+            path=file.filename,
+            data=file_content,
+            options={"access": "public"}
+        )
     
   
 
@@ -153,12 +154,6 @@ async def upload_document(
     )
     
     return {"message": "Document queued for indexing by Admin."}
-
-
-@app.get("/api/upload/token")
-def get_blob_token():
-    # This token allows a browser to upload a file WITHOUT 4.5MB limits
-    return {"token": blob.generate_client_token()} 
 
 
 class QuestionRequest(BaseModel):
