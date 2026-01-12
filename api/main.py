@@ -96,7 +96,7 @@ app = FastAPI()
 # Serve Inngest
 inngest.fast_api.serve(app, inngest_client, [import_product_documents])
 
-UPLOAD_DIR = "uploaded_docs"
+UPLOAD_DIR = "/tmp"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.post("/upload-and-index")
