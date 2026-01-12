@@ -7,7 +7,7 @@ import logging
 import inngest
 import inngest.fast_api
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form,Request
 import requests
 from vercel import blob
 
@@ -127,6 +127,21 @@ async def process_url(data: AdminUrlRequest):
         )
     )
     return {"message": "URL received. Indexing started in background."}
+
+@app.post("/api/upload")
+async def handle_blob_upload(request: Request):
+    # This specifically catches the 'blob.generate-client-token' 
+    # request you saw in your logs earlier.
+    body = await request.json()
+    
+    if body.get("type") == "blob.generate-client-token":
+        # Returns the token in the exact JSON format the Vercel Frontend SDK needs
+        return {
+            "type": "blob.generate-client-token",
+            "clientToken": os.getenv("BLOB_READ_WRITE_TOKEN")
+        }
+
+    return {"error": "Invalid request type"}
 
 
 class QuestionRequest(BaseModel):
