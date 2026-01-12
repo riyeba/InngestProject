@@ -8,6 +8,8 @@ import inngest
 import inngest.fast_api
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, Form
+import requests
+from vercel import blob
 
 # LlamaIndex Imports
 from llama_index.core import StorageContext, VectorStoreIndex, SimpleDirectoryReader, Settings
@@ -59,13 +61,20 @@ storage_context = StorageContext.from_defaults(vector_store=vector_store)
     ]
 )
 async def import_product_documents(ctx: inngest.Context):
-    target_file = ctx.event.data.get("file_path")
+    # target_file = ctx.event.data.get("file_path")
+    file_url = ctx.event.data.get("file_url")
     query_text = ctx.event.data.get("user_question")
+    
+    
+    temp_local_path = f"/tmp/{os.path.basename(file_url)}"
+    response = requests.get(file_url)
+    with open(temp_local_path, "wb") as f:
+        f.write(response.content)
 
     # STEP 1: Load Data
     
     async def index_logic():
-        documents = SimpleDirectoryReader(input_files=[target_file]).load_data()
+        documents = SimpleDirectoryReader(input_files=[temp_local_path]).load_data()
         VectorStoreIndex.from_documents(
             documents, 
             storage_context=storage_context,
@@ -96,33 +105,37 @@ app = FastAPI()
 # Serve Inngest
 inngest.fast_api.serve(app, inngest_client, [import_product_documents])
 
-UPLOAD_DIR = "/tmp"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# UPLOAD_DIR = "/tmp"
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.post("/upload-and-index")
 async def upload_document(
     question: str = Form(...), 
     file: UploadFile = File(...)
 ):
-    # Save the file locally
-    local_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(local_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    file_content = await file.read()
     
-    full_absolute_path = os.path.abspath(local_path)
+    uploaded_blob = blob.upload_file(
+        file_content=file_content,
+        path=file.filename,
+        access="public"
+    )
+    
+  
+   
     
     # Trigger the durable workflow
     await inngest_client.send(
         inngest.Event(
             name="shop/product.imported",
             data={
-                "file_path": full_absolute_path,
+                "file_ur": uploaded_blob.url,
                 "user_question": question  
             }
         )
     )
     
     return {
-        "message": f"File {file.filename} queued for processing.",
-        "status": "In-progress"
+         "message": f"File {file.filename} uploaded to Blob and queued.",
+        "url": uploaded_blob.url
     }
