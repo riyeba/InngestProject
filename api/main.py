@@ -107,8 +107,7 @@ async def import_product_documents(ctx: inngest.Context):
 # 5. FastAPI Setup
 app = FastAPI()
 
-# Serve Inngest
-inngest.fast_api.serve(app, inngest_client, [import_product_documents])
+
 
 
 
@@ -175,3 +174,6 @@ async def user_ask(request: QuestionRequest):
     response = await query_engine.aquery(request.user_question)
     
     return {"answer": str(response)}
+
+# Serve Inngest
+inngest.fast_api.serve(app, inngest_client, [import_product_documents])
