@@ -132,7 +132,7 @@ async def upload_document(
         inngest.Event(
             name="shop/product.imported",
             data={
-                "file_ur": uploaded_blob.url,
+                "file_url": uploaded_blob.url,
                
             }
         )
