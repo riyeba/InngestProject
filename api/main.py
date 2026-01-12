@@ -11,6 +11,7 @@ from fastapi import FastAPI, File, UploadFile, Form
 import requests
 from vercel import blob
 
+
 # LlamaIndex Imports
 from llama_index.core import StorageContext, VectorStoreIndex, SimpleDirectoryReader, Settings
 from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -18,6 +19,8 @@ from llama_index.llms.openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client import AsyncQdrantClient
 from llama_index.embeddings.openai import OpenAIEmbedding
+from pydantic import BaseModel
+
 
 # 1. Load Environment Variables
 load_dotenv()
@@ -130,12 +133,25 @@ async def upload_document(
             name="shop/product.imported",
             data={
                 "file_ur": uploaded_blob.url,
-                "user_question": question  
+               
             }
         )
     )
     
-    return {
-         "message": f"File {file.filename} uploaded to Blob and queued.",
-        "url": uploaded_blob.url
-    }
+    return {"message": "Document queued for indexing by Admin."}
+
+
+# 2. USER ENDPOINT: Question Only (No file needed)
+class QuestionRequest(BaseModel):
+    user_question: str
+
+@app.post("/user/ask")
+async def user_ask(request: QuestionRequest):
+    # Retrieve the index from the existing Qdrant collection
+    index = VectorStoreIndex.from_vector_store(vector_store)
+    query_engine = index.as_query_engine(llm=llm)
+    
+    # Query immediately (no Inngest needed here for instant chat response)
+    response = await query_engine.aquery(request.user_question)
+    
+    return {"answer": str(response)}
