@@ -109,7 +109,8 @@ async def import_product_documents(ctx: inngest.Context):
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173",  # Your local frontend
+    "http://localhost:5173",  # Your local frontend 
+    "http://localhost:5175/",
     "http://127.0.0.1:5173",
     "https://inngest-project.vercel.app", # Your backend itself (for production safety)
 ]
