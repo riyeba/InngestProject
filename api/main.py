@@ -90,6 +90,10 @@ async def import_product_documents(ctx: inngest.Context):
         return {"status": "success", "count": len(documents)}
     
     step_result = await ctx.step.run("index-to-qdrant", index_logic)
+    return {
+        "status": "completed",
+        "indexing_details": step_result
+    }
  
 
     # STEP 3: Query the engine (The code will reach here!)
@@ -165,7 +169,7 @@ class QuestionRequest(BaseModel):
 async def user_ask(request: QuestionRequest):
     # Retrieve the index from the existing Qdrant collection
     index = VectorStoreIndex.from_vector_store(vector_store)
-    query_engine = index.as_query_engine(llm=llm)
+    query_engine = index.as_query_engine(llm=llm, similarity_top_k=5)
     
     # Query immediately (no Inngest needed here for instant chat response)
     response = await query_engine.aquery(request.user_question)
