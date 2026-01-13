@@ -93,16 +93,16 @@ async def import_product_documents(ctx: inngest.Context):
  
 
     # STEP 3: Query the engine (The code will reach here!)
-    async def query_logic():
-        index = VectorStoreIndex.from_vector_store(vector_store)
-        query_engine = index.as_query_engine(llm=llm)
-        response = await query_engine.aquery(query_text)
-        return str(response)
+    # async def query_logic():
+    #     index = VectorStoreIndex.from_vector_store(vector_store)
+    #     query_engine = index.as_query_engine(llm=llm)
+    #     response = await query_engine.aquery(query_text)
+    #     return str(response)
 
-    final_answer = await ctx.step.run("generate-rag-response", query_logic)
+    # final_answer = await ctx.step.run("generate-rag-response", query_logic)
 
-    # Final return for the whole workflow
-    return {"answer": final_answer, "indexing_meta": step_result}
+    # # Final return for the whole workflow
+    # return {"answer": final_answer, "indexing_meta": step_result}
    
 
 # 5. FastAPI Setup
